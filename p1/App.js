@@ -56,12 +56,13 @@ io.on("connection", (socket) => {
 const __dirname = path.resolve();
 
 if (process.env.NODE_ENV === "production") {
-    // Serve static files from dist
-    app.use(express.static(path.join(__dirname, "../p1_f/dist")));
 
-    // Catch-all route for React Router
+    const frontendPath = path.join(__dirname, "p1_f", "dist");
+
+    app.use(express.static(frontendPath));
+
     app.get("*", (req, res) => {
-        res.sendFile(path.join(__dirname, "p1_f/dist", "index.html"));
+        res.sendFile(path.join(frontendPath, "index.html"));
     });
 }
 
