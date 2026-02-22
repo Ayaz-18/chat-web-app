@@ -5,8 +5,6 @@ import UserInfo from "../components/UserInfo";
 import axios from "axios";
 import { io } from "socket.io-client";
 
-const API = import.meta.env.VITE_BACKEND_URL;
-
 export default function Home() {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
@@ -34,13 +32,13 @@ export default function Home() {
   // --------------------------------
   const fetchUsers = async () => {
     try {
-      const res = await axios.get(`${API}/message/all-user`, {
+      const res = await axios.get("/message/all-user", {
         withCredentials: true,
       });
 
-      setUsers(res.data.user || {});
+      setUsers(res.data.user || []);
     } catch (err) {
-      // console.log(err);
+      console.log(err);
     }
   };
 
@@ -55,19 +53,19 @@ export default function Home() {
   // --------------------------------
   const fetchMessages = async (id) => {
     try {
-      const res = await axios.get(`${API}/message/message/${id}`, {
+      const res = await axios.get(`/message/message/${id}`, {
         withCredentials: true,
       });
 
       setMessages(res.data.messages);
 
       await axios.put(
-        `${API}/message/mark-as-seen/${id}`,
+        `/message/mark-as-seen/${id}`,
         {},
         { withCredentials: true }
       );
 
-      // remove unread count
+      // Remove unread count
       setUnread((prev) => {
         const updated = { ...prev };
         delete updated[id];
@@ -79,12 +77,12 @@ export default function Home() {
   };
 
   // --------------------------------
-  // 4️⃣ SOCKET SETUP (ONLY ONCE)
+  // 4️⃣ SOCKET SETUP
   // --------------------------------
   useEffect(() => {
     if (!currentUser) return;
 
-    socketRef.current = io(API, {
+    socketRef.current = io("/", {
       withCredentials: true,
       query: { userid: currentUser._id },
     });
@@ -96,7 +94,6 @@ export default function Home() {
 
     // New message
     socketRef.current.on("new-message", (message) => {
-      // If chat is open
       if (
         selectedUser &&
         (message.senderid === selectedUser._id ||
@@ -104,14 +101,14 @@ export default function Home() {
       ) {
         setMessages((prev) => [...prev, message]);
 
-        // mark seen instantly
+        // Mark as seen instantly
         axios.put(
-          `${API}/message/mark-as-seen/${selectedUser._id}`,
+          `/message/mark-as-seen/${selectedUser._id}`,
           {},
           { withCredentials: true }
         );
       } else {
-        // If chat NOT open → increase unread
+        // Increase unread count
         setUnread((prev) => ({
           ...prev,
           [message.senderid]:
@@ -126,7 +123,7 @@ export default function Home() {
   }, [currentUser, selectedUser]);
 
   // --------------------------------
-  // 5️⃣ Filter users
+  // 5️⃣ Filter Users
   // --------------------------------
   const filteredUsers = users.filter((u) =>
     u.name.toLowerCase().includes(search.toLowerCase())

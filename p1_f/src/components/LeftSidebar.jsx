@@ -30,7 +30,7 @@ export default function LeftSidebar({
       }
 
       const res = await axios.put(
-        "http://localhost:3000/user/update-profile",
+        "/user/update-profile",
         formData,
         {
           withCredentials: true,
@@ -44,12 +44,14 @@ export default function LeftSidebar({
       setShowEdit(false);
       alert("Profile Updated ✅");
     } catch (error) {
+      console.log(error);
       alert("Something went wrong");
     }
   };
 
   return (
     <div className="w-[25%] bg-gray-900/80 flex flex-col border-r border-gray-700 relative">
+      
       {/* ---------------- Profile Header ---------------- */}
       <div className="flex items-center justify-between p-4 border-b border-gray-700">
         <div className="flex items-center gap-3 relative">
@@ -59,7 +61,6 @@ export default function LeftSidebar({
             alt=""
           />
 
-          {/* Online dot for self */}
           <span className="absolute bottom-0 left-7 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></span>
 
           <div>
@@ -109,7 +110,6 @@ export default function LeftSidebar({
                   alt=""
                 />
 
-                {/* Online indicator */}
                 {isOnline && (
                   <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-gray-900"></span>
                 )}
@@ -122,7 +122,6 @@ export default function LeftSidebar({
                 </p>
               </div>
 
-              {/* 🔥 Unread Badge */}
               {unreadCount > 0 && (
                 <span className="bg-blue-600 text-white text-xs px-2 py-0.5 rounded-full">
                   {unreadCount}

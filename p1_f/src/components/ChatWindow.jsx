@@ -10,15 +10,18 @@ export default function ChatWindow({
   setMessages,
 }) {
   const [text, setText] = useState("");
-  const API = import.meta.env.VITE_BACKEND_URL;
   const messagesEndRef = useRef(null);
 
-  // 🔥 Auto scroll
+  // --------------------------------
+  // Auto Scroll
+  // --------------------------------
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // 🔥 Listen for realtime messages
+  // --------------------------------
+  // Realtime Listener
+  // --------------------------------
   useEffect(() => {
     const socket = getSocket();
     if (!socket) return;
@@ -35,27 +38,31 @@ export default function ChatWindow({
     return () => {
       socket.off("new-message");
     };
-  }, [selectedUser]);
+  }, [selectedUser, setMessages]);
 
+  // --------------------------------
+  // Send Message
+  // --------------------------------
   const handleSend = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !selectedUser) return;
 
     try {
       const res = await axios.post(
-        `${API}/message/send/${selectedUser._id}`,
+        `/message/send/${selectedUser._id}`,
         { text },
         { withCredentials: true }
       );
 
-      setMessages((prev) => [...prev, res.data]); // ✅ correct now
+      setMessages((prev) => [...prev, res.data]);
       setText("");
     } catch (error) {
-      // console.log(error);
+      console.log("Send message error:", error);
     }
   };
 
   return (
     <div className="flex-1 flex flex-col bg-gray-900/40">
+      
       {/* Header */}
       <div className="p-4 border-b border-gray-700 bg-gray-900/70">
         {selectedUser ? selectedUser.name : "Select a user to chat"}
@@ -65,7 +72,7 @@ export default function ChatWindow({
       <div className="flex-1 p-4 overflow-y-auto space-y-4">
         {selectedUser ? (
           messages.map((msg) => {
-            const isMe = msg.senderid === currentUser._id;
+            const isMe = msg.senderid === currentUser?._id;
 
             return (
               <div
